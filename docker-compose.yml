@@ -1,0 +1,57 @@
+version: "3.8"
+services:
+  kostandcost_nginx:
+    container_name: kostandcost_nginx
+    build:
+      context: ./docker/nginx/. # The path of the Dockerfile
+    restart: always
+    volumes:
+    - ".docker/nginx/:/usr/src/app/docker/nginx/"
+    environment:
+      NGINX_FPM_HOST: kostandcost_app
+      NGINX_ROOT: /usr/src/app/docker/nginx/
+    ports:
+      - "8000:80"
+    depends_on:
+      - kostandcost_app
+    networks:
+      - kostandcost_network
+
+  kostandcost_db:
+    image: mysql:5
+    container_name: kostandcost_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: kostandcost
+      MYSQL_ROOT_PASSWORD: sesuaiJadwal
+      MYSQL_USER: root
+      MYSQL_PASSWORD: sesuaiJadwal
+    ports:
+      - "3307:3307"
+    volumes:
+      - ".docker/mysql:/var/lib/mysql"
+    networks:
+      - kostandcost_network
+
+  kostandcost_app:
+    build:
+      context: . # The path of the Dockerfile
+    container_name: kostandcost_app
+    restart: always
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - kostandcost_db
+    working_dir: /usr/src/app
+    environment:
+      SERVICE_NAME: kostandcost-app
+      DB_CONNECTION: mysql
+      DB_DRIVER: mysql
+      DB_HOST: kostandcost_db
+      DB_PORT: 3307
+    networks:
+      - kostandcost_network
+
+networks:
+  kostandcost_network:
+    driver: bridge

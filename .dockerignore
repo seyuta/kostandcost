@@ -1,0 +1,8 @@
+bin/
+.build
+.history
+.git
+.gitignore
+.gitmodules
+.env.example
+README.md
